@@ -1,0 +1,7 @@
+.vscode/
+.vs/
+
+/node_modules/
+/dist/
+
+*.user

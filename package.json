@@ -1,0 +1,32 @@
+{
+  "name": "100-cell-calculation",
+  "version": "1.0.0",
+  "description": "```bash\r npm install\r ```",
+  "homepage": "https://github.com/Kawayan/100-cell-calculation#readme",
+  "bugs": {
+    "url": "https://github.com/Kawayan/100-cell-calculation/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kawayan/100-cell-calculation.git"
+  },
+  "license": "MIT",
+  "author": "Kawayan",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "lite-server"
+  },
+  "engines": {
+    "node": ">=18.12.0"
+  },
+  "devDependencies": {
+    "lite-server": "^2.6.1",
+    "webpack": "^5.102.1",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "seedrandom": "^3.0.5"
+  }
+}
