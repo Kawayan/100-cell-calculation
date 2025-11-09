@@ -3,76 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
   <title>100マス計算</title>
-
-  <style>
-    :root{
-      --gap:8px;
-      --cell-size:80px;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
-    }
-    body{
-      margin:16px;
-      line-height:1.4;
-      color:#111;
-    }
-    header{
-      display:flex;
-      gap:16px;
-      align-items:center;
-      flex-wrap:wrap;
-      margin-bottom:12px;
-    }
-    select, button{
-      padding:8px 12px;
-      font-size:14px;
-    }
-    #controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-    #grid{
-      display:grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: 0;
-      margin-top:12px;
-      border: 1px solid #d0d0d0;
-    }
-    .cell{
-      border-radius:0;
-      padding:8px;
-      min-height: var(--cell-size);
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-      background:#ffffff;
-      border-right: 1px solid #d0d0d0;
-      border-bottom: 1px solid #d0d0d0;
-      font-size:14px;
-    }
-    .cell:nth-child(10n) {
-      border-right: none;
-    }
-    .cell:nth-child(n+91) {
-      border-bottom: none;
-    }
-    .question{ font-weight:600; margin-bottom:6px; }
-    .cell input{
-      width:60%;
-      box-sizing:border-box;
-      padding:6px;
-      font-size:14px;
-      text-align:center;
-      border-radius:6px;
-      border:1px solid #ccc;
-    }
-    .cell.correct{ background:#e6ffed; }
-    .cell.wrong{ background:#ffecec; }
-    #status { margin-left:8px; font-weight:600; }
-    footer { margin-top:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-    @media (max-width:720px){
-      :root { --cell-size:64px; }
-      .cell input{ width:72%; }
-    }
-  </style>
 </head>
 <body>
   <h1>100マス計算</h1>
@@ -89,11 +21,18 @@
       </label>
 
       <label>
-        桁の上限:
+        数値の上限:
         <select id="maxValue">
-          <option value="9">9</option>
+          <option value="9" selected>9</option>
           <option value="19">19</option>
-          <option value="99" selected>99</option>
+          <option value="29">29</option>
+          <option value="39">39</option>
+          <option value="49">49</option>
+          <option value="59">59</option>
+          <option value="69">69</option>
+          <option value="79">79</option>
+          <option value="89">89</option>
+          <option value="99">99</option>
         </select>
       </label>
 

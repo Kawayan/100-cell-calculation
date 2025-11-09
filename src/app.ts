@@ -13,7 +13,6 @@ const gridEl = document.getElementById('grid') as HTMLDivElement;
 const opSelect = document.getElementById('opSelect') as HTMLSelectElement;
 const regenBtn = document.getElementById('regenBtn') as HTMLButtonElement;
 const startBtn = document.getElementById('startBtn') as HTMLButtonElement;
-const checkBtn = document.getElementById('checkBtn') as HTMLButtonElement;
 const statusEl = document.getElementById('status') as HTMLDivElement;
 const timerEl = document.getElementById('timer') as HTMLDivElement;
 const maxValueSelect = document.getElementById('maxValue') as HTMLSelectElement;
@@ -22,28 +21,58 @@ let problems: Problem[] = [];
 let timerInterval: number | null = null;
 let startTime: number | null = null;
 
-function getRandInt(min: number, max: number){
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+function getRandInt(min: number, max: number): number {
+  const minCeil = Math.ceil(min);
+  const maxFloor = Math.floor(max);
+  return Math.floor(Math.random() * (maxFloor - minCeil + 1)) + minCeil;
 }
 
-function genProblems(opType: OperationType, maxVal: number){
+function shuffleArray(min: number, max: number, size: number): number[] {
+  let results: number[] = [];
+  results[0] = getRandInt(min, max);
+
+  for (let i = 1; i < size; i++)
+  {
+    let num = getRandInt(min, max);
+    while (results[i-1] === num
+        || results.filter(n => n === num).length >= 2)
+    {
+      num = getRandInt(min, max);
+    }
+    results.push(num);
+  }
+
+  return results;
+}
+
+function genProblems(opType: OperationType, max: number){
   let answer: number;
 
-  const min = 1;
+  const min = 1;  
+  const num1Values = shuffleArray(min, max, 10);
+  
+  const num2Max = opType === '*' ? Math.min(2, max) : max;
+  const num2Values = shuffleArray(min, num2Max, 10);
+  
+  // Generate problems
   problems = [];
   for (let i = 0; i < 10; i++) {
-    let num1 = getRandInt(min, maxVal);
+    const num1 = num1Values[i]!;
     
     for (let j = 0; j < 10; j++) {
-      let num2: number;
+      const num2 = num2Values[j]!;
+      
       if (opType === '+') {
-        num2 = getRandInt(min, maxVal);
         answer = num1 + num2;
       } else if (opType === '-') {
-        num2 = getRandInt(min, num1); // 結果を非負にする
+        // For subtraction, ensure num1 >= num2
+        if (num1 < num2) {
+          answer = num2 - num1;
+          problems.push({ num1: num2, num2: num1, opType: opType, answer, id: cryptoId() });
+          continue;
+        }
         answer = num1 - num2;
       } else if (opType === '*') {
-        num2 = getRandInt(min, Math.min(12, maxVal));
         answer = num1 * num2;
       } else {
         throw new Error(`Invalid operation type: ${opType}`);
@@ -75,14 +104,15 @@ function renderGrid() {
   const num1Values: number[] = [];
   const num2Values: number[] = [];
   
-  for (let i = 0; i < 10; i++) {
-    const rowProblem = problems[i * 10];
+  const problemsNum = 10;
+  for (let i = 0; i < problemsNum; i++) {
+    const rowProblem = problems[i * problemsNum];
     if (rowProblem) {
       num1Values.push(rowProblem.num1);
     }
   }
   
-  for (let j = 0; j < 10; j++) {
+  for (let j = 0; j < problemsNum; j++) {
     const colProblem = problems[j];
     if (colProblem) {
       num2Values.push(colProblem.num2);
@@ -103,7 +133,7 @@ function renderGrid() {
   }
   
   // Data rows
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < problemsNum; i++) {
     // Header column (num1 value)
     const headerCell = document.createElement('div');
     headerCell.className = 'cell header-cell';
@@ -111,8 +141,8 @@ function renderGrid() {
     gridEl.appendChild(headerCell);
     
     // Data cells
-    for (let j = 0; j < 10; j++) {
-      const p = problems[i * 10 + j]!;
+    for (let j = 0; j < problemsNum; j++) {
+      const p = problems[i * problemsNum + j]!;
       const cell = document.createElement('div');
       cell.className = 'cell';
       cell.dataset["id"] = p.id;
@@ -171,35 +201,14 @@ function focusNextInput(currentId: string) {
   }
 }
 
-function checkAnswers() {
-  let correct = 0;
-  problems.forEach((p) => {
-    const cell = gridEl.querySelector(`div.cell[data-id="${p.id}"]`) as HTMLDivElement | null;
-    if (!cell) return;
-    const input = cell.querySelector('input') as HTMLInputElement;
-    const userRaw = (input.value ?? '').trim();
-    p.userInput = userRaw;
-    // 空欄は不正解扱い
-    const parsed = userRaw === '' ? null : Number(userRaw);
-    if (parsed !== null && !Number.isNaN(parsed) && parsed === p.answer) {
-      correct++;
-      cell.classList.remove('wrong');
-      cell.classList.add('correct');
-    } else {
-      cell.classList.remove('correct');
-      cell.classList.add('wrong');
-    }
-  });
-  updateStatus(correct);
-  stopTimer();
-}
-
 function updateStatus(correctCount?: number) {
-  const c = typeof correctCount === 'number' ? correctCount : problems.reduce((acc, p) => {
-    // 仮の既答チェック（正確な採点は checkAnswers を呼ぶ）
-    const parsed = p.userInput ? Number(p.userInput) : null;
-    return acc + ((parsed !== null && !Number.isNaN(parsed) && parsed === p.answer) ? 1 : 0);
-  }, 0);
+  const c = typeof correctCount === 'number'
+    ? correctCount
+    : problems.reduce((acc, p) => {
+        // 仮の既答チェック（正確な採点は checkAnswers を呼ぶ）
+        const parsed = p.userInput ? Number(p.userInput) : null;
+        return acc + ((parsed !== null && !Number.isNaN(parsed) && parsed === p.answer) ? 1 : 0);
+      }, 0);
   statusEl.textContent = `正答: ${c} / ${problems.length}`;
 }
 
@@ -254,14 +263,11 @@ startBtn.addEventListener('click', () => {
   if (!timerInterval) {
     startTimer();
     startBtn.textContent = '停止';
+    focusFirst();
   } else {
     stopTimer();
     startBtn.textContent = '開始';
   }
-});
-
-checkBtn.addEventListener('click', () => {
-  checkAnswers();
 });
 
 // 初期化
