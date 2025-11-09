@@ -1,4 +1,6 @@
-type OperationType = '+' | '-' | '*';
+﻿type OperationType = '+' | '-' | '*';
+
+const VERSION = "1.0.0";
 
 interface Problem{
   id: string;
@@ -9,17 +11,20 @@ interface Problem{
   userInput?: string;
 }
 
-const gridEl = document.getElementById('grid') as HTMLDivElement;
 const opSelect = document.getElementById('opSelect') as HTMLSelectElement;
-const regenBtn = document.getElementById('regenBtn') as HTMLButtonElement;
-const startBtn = document.getElementById('startBtn') as HTMLButtonElement;
-const statusEl = document.getElementById('status') as HTMLDivElement;
-const timerEl = document.getElementById('timer') as HTMLDivElement;
 const maxValueSelect = document.getElementById('maxValue') as HTMLSelectElement;
+
+const regenerateBtn = document.getElementById('regenerateBtn') as HTMLButtonElement;
+const startBtn = document.getElementById('startBtn') as HTMLButtonElement;
+
+const gridEl = document.getElementById('grid') as HTMLDivElement;
+const timerEl = document.getElementById('timer') as HTMLDivElement;
+const versionEl = document.getElementById('version') as HTMLElement;
 
 let problems: Problem[] = [];
 let timerInterval: number | null = null;
 let startTime: number | null = null;
+let isInputEnabled = false;
 
 function getRandInt(min: number, max: number): number {
   const minCeil = Math.ceil(min);
@@ -92,8 +97,8 @@ function generateProblems() {
   const maxVal = Number(maxValueSelect.value);
   genProblems(op, maxVal);
   
+  isInputEnabled = false;
   renderGrid();
-  updateStatus();
   resetTimer();
 }
 
@@ -142,29 +147,77 @@ function renderGrid() {
     
     // Data cells
     for (let j = 0; j < problemsNum; j++) {
-      const p = problems[i * problemsNum + j]!;
+      const problem = problems[i * problemsNum + j]!;
       const cell = document.createElement('div');
       cell.className = 'cell';
-      cell.dataset["id"] = p.id;
+      cell.dataset["id"] = problem.id;
 
       const input = document.createElement('input');
       input.type = 'text';
       input.setAttribute('inputmode', 'numeric');
-      input.value = p.userInput ?? '';
+      input.value = problem.userInput ?? '';
+      input.disabled = !isInputEnabled;
+      
+      // Check if already answered correctly
+      const parsed = problem.userInput ? Number(problem.userInput) : null;
+      const alreadyCorrect = isNumCorrect(parsed, problem);
+      let isAnswered = alreadyCorrect;
+      
+      if (alreadyCorrect) {
+        cell.classList.add('correct');
+        input.value = problem.answer.toString();
+      }
+      
       input.addEventListener('input', () => {
+        // Filter out non-numeric characters
+        const filteredValue = input.value.replace(/[^0-9]/g, '');
+        if (input.value !== filteredValue) {
+          input.value = filteredValue;
+        }
+        
+        // If already answered correctly, forward input to next cell
+        if (isAnswered) {
+          const inputValue = input.value;
+          const correctAnswer = problem.answer.toString();
+          input.value = correctAnswer;
+          
+          // Extract the part that exceeds the correct answer
+          let valueToForward = '';
+          if (inputValue.startsWith(correctAnswer)) {
+            // If input starts with correct answer, forward the remaining part
+            valueToForward = inputValue.slice(correctAnswer.length);
+          } else {
+            // If input doesn't start with correct answer, forward the entire input
+            // (This handles cases where user deletes and types new value)
+            valueToForward = inputValue;
+          }
+          
+          // Move input to next cell
+          setTimeout(() => {
+            if (valueToForward) {
+              focusNextInput(problem.id, valueToForward);
+            } else {
+              focusNextInput(problem.id);
+            }
+          }, 0);
+          return;
+        }
+        
         const userRaw = input.value.trim();
-        p.userInput = userRaw;
+        problem.userInput = userRaw;
         
         // Auto-check answer
         const parsed = userRaw === '' ? null : Number(userRaw);
-        const isCorrect = parsed !== null && !Number.isNaN(parsed) && parsed === p.answer;
+        const isCorrect = isNumCorrect(parsed, problem);
         
         if (isCorrect) {
           cell.classList.remove('wrong');
           cell.classList.add('correct');
+          isAnswered = true;
+          input.value = problem.answer.toString();
           // Move to next cell
           setTimeout(() => {
-            focusNextInput(p.id);
+            focusNextInput(problem.id);
           }, 100);
         } else {
           cell.classList.remove('correct');
@@ -174,15 +227,53 @@ function renderGrid() {
             cell.classList.remove('wrong');
           }
         }
-        
-        updateStatus();
       });
 
-      // Enterで次のセルにフォーカスする
       input.addEventListener('keydown', (ev) => {
-        if (ev.key === 'Enter') {
+        // Handle ESC key to clear input
+        if (ev.key === 'Escape') {
           ev.preventDefault();
-          focusNextInput(p.id);
+          input.value = '';
+          problem.userInput = '';
+          cell.classList.remove('correct', 'wrong');
+          isAnswered = false;
+          return;
+        }
+        
+        // If already answered correctly, allow input to be forwarded to next cell
+        // Don't prevent default so input event can fire and handle forwarding
+        if (isAnswered) {
+          // Let input event handle forwarding the value
+          return;
+        }
+        
+        // Allow control keys (Backspace, Delete, Arrow keys, Tab, Enter, etc.)
+        if (ev.ctrlKey || ev.metaKey || ev.altKey) {
+          return;
+        }
+        
+        // Allow special keys
+        const allowedKeys = [
+          'Backspace', 'Delete',
+          'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+          'Home', 'End'
+        ];
+        if (allowedKeys.includes(ev.key)) {
+          return;
+        }
+        
+        // Allow only numeric keys (0-9)
+        if (!/^[0-9]$/.test(ev.key)) {
+          ev.preventDefault();
+        }
+      });
+
+      // Prevent text selection on cell click
+      cell.addEventListener('mousedown', (ev) => {
+        // Prevent default selection behavior
+        if (ev.target !== input) {
+          ev.preventDefault();
+          input.focus();
         }
       });
 
@@ -192,30 +283,32 @@ function renderGrid() {
   }
 }
 
-function focusNextInput(currentId: string) {
+function isNumCorrect(num: number | null, problem: Problem){
+  const isCorrect = num !== null
+                  && !Number.isNaN(num)
+                  && num === problem.answer;
+   return isCorrect;
+}
+
+function focusNextInput(currentId: string, valueToSet?: string) {
   const idx = problems.findIndex(p => p.id === currentId);
   if (idx >= 0 && idx < problems.length - 1) {
     const nextId = problems![idx + 1]!.id;
     const nextInput = gridEl.querySelector(`div.cell[data-id="${nextId}"] input`) as HTMLInputElement | null;
-    nextInput?.focus();
+    if (nextInput) {
+      if (valueToSet !== undefined) {
+        nextInput.value = valueToSet;
+        // Trigger input event to process the value
+        nextInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      nextInput.focus();
+    }
   }
 }
 
-function updateStatus(correctCount?: number) {
-  const c = typeof correctCount === 'number'
-    ? correctCount
-    : problems.reduce((acc, p) => {
-        // 仮の既答チェック（正確な採点は checkAnswers を呼ぶ）
-        const parsed = p.userInput ? Number(p.userInput) : null;
-        return acc + ((parsed !== null && !Number.isNaN(parsed) && parsed === p.answer) ? 1 : 0);
-      }, 0);
-  statusEl.textContent = `正答: ${c} / ${problems.length}`;
-}
-
 function startTimer() {
-  if (timerInterval)
-     return; // 既に動いている
-     
+  resetTimer();
+
   startTime = Date.now();
   timerInterval = window.setInterval(() => {
     if (!startTime) return;
@@ -225,16 +318,12 @@ function startTimer() {
 }
 
 function resetTimer() {
-  stopTimer();
-  timerEl.textContent = '00:00:000';
-}
-
-function stopTimer() {
   if (timerInterval) {
     clearInterval(timerInterval);
     timerInterval = null;
   }
   startTime = null;
+  timerEl.textContent = '00:00:000';
 }
 
 function formatTime(ms: number) {
@@ -245,14 +334,20 @@ function formatTime(ms: number) {
   return `${mm}:${ss}:${mmm}`;
 }
 
-// 小さなヘルパー: 全入力欄にフォーカスする最初のもの
 function focusFirst() {
   const firstInput = gridEl.querySelector('input') as HTMLInputElement | null;
   firstInput?.focus();
 }
 
+function enableAllInputs() {
+  const inputs = gridEl.querySelectorAll('input') as NodeListOf<HTMLInputElement>;
+  inputs.forEach(input => {
+    input.disabled = false;
+  });
+}
+
 // イベント登録
-regenBtn.addEventListener('click', () => {
+regenerateBtn.addEventListener('click', () => {
   generateProblems();
   focusFirst();
 });
@@ -260,15 +355,12 @@ opSelect.addEventListener('change', () => generateProblems());
 maxValueSelect.addEventListener('change', () => generateProblems());
 
 startBtn.addEventListener('click', () => {
-  if (!timerInterval) {
-    startTimer();
-    startBtn.textContent = '停止';
-    focusFirst();
-  } else {
-    stopTimer();
-    startBtn.textContent = '開始';
-  }
+  isInputEnabled = true;
+  enableAllInputs();
+  startTimer();
+  focusFirst();
 });
 
 // 初期化
+versionEl.textContent = `(version ${VERSION})`;
 generateProblems();
