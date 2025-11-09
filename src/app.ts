@@ -70,57 +70,95 @@ function generateProblems() {
 
 function renderGrid() {
   gridEl.innerHTML = '';
-  for (const p of problems) {
-    const cell = document.createElement('div');
-    cell.className = 'cell';
-    cell.dataset["id"] = p.id;
+  
+  // Extract unique num1 and num2 values for headers
+  const num1Values: number[] = [];
+  const num2Values: number[] = [];
+  
+  for (let i = 0; i < 10; i++) {
+    const rowProblem = problems[i * 10];
+    if (rowProblem) {
+      num1Values.push(rowProblem.num1);
+    }
+  }
+  
+  for (let j = 0; j < 10; j++) {
+    const colProblem = problems[j];
+    if (colProblem) {
+      num2Values.push(colProblem.num2);
+    }
+  }
+  
+  // Top-left empty cell
+  const emptyCell = document.createElement('div');
+  emptyCell.className = 'cell header-cell';
+  gridEl.appendChild(emptyCell);
+  
+  // Header row (num2 values)
+  for (const num2 of num2Values) {
+    const headerCell = document.createElement('div');
+    headerCell.className = 'cell header-cell';
+    headerCell.textContent = num2.toString();
+    gridEl.appendChild(headerCell);
+  }
+  
+  // Data rows
+  for (let i = 0; i < 10; i++) {
+    // Header column (num1 value)
+    const headerCell = document.createElement('div');
+    headerCell.className = 'cell header-cell';
+    headerCell.textContent = num1Values[i]!.toString();
+    gridEl.appendChild(headerCell);
+    
+    // Data cells
+    for (let j = 0; j < 10; j++) {
+      const p = problems[i * 10 + j]!;
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset["id"] = p.id;
 
-    const q = document.createElement('div');
-    q.className = 'question';
-    q.textContent = `${p.num1} ${p.opType} ${p.num2} =`;
-
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.setAttribute('inputmode', 'numeric');
-    input.value = p.userInput ?? '';
-    input.addEventListener('input', () => {
-      const userRaw = input.value.trim();
-      p.userInput = userRaw;
-      
-      // Auto-check answer
-      const parsed = userRaw === '' ? null : Number(userRaw);
-      const isCorrect = parsed !== null && !Number.isNaN(parsed) && parsed === p.answer;
-      
-      if (isCorrect) {
-        cell.classList.remove('wrong');
-        cell.classList.add('correct');
-        // Move to next cell
-        setTimeout(() => {
-          focusNextInput(p.id);
-        }, 100);
-      } else {
-        cell.classList.remove('correct');
-        if (userRaw !== '') {
-          cell.classList.add('wrong');
-        } else {
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.setAttribute('inputmode', 'numeric');
+      input.value = p.userInput ?? '';
+      input.addEventListener('input', () => {
+        const userRaw = input.value.trim();
+        p.userInput = userRaw;
+        
+        // Auto-check answer
+        const parsed = userRaw === '' ? null : Number(userRaw);
+        const isCorrect = parsed !== null && !Number.isNaN(parsed) && parsed === p.answer;
+        
+        if (isCorrect) {
           cell.classList.remove('wrong');
+          cell.classList.add('correct');
+          // Move to next cell
+          setTimeout(() => {
+            focusNextInput(p.id);
+          }, 100);
+        } else {
+          cell.classList.remove('correct');
+          if (userRaw !== '') {
+            cell.classList.add('wrong');
+          } else {
+            cell.classList.remove('wrong');
+          }
         }
-      }
-      
-      updateStatus();
-    });
+        
+        updateStatus();
+      });
 
-    // Enterで次のセルにフォーカスする
-    input.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter') {
-        ev.preventDefault();
-        focusNextInput(p.id);
-      }
-    });
+      // Enterで次のセルにフォーカスする
+      input.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter') {
+          ev.preventDefault();
+          focusNextInput(p.id);
+        }
+      });
 
-    cell.appendChild(q);
-    cell.appendChild(input);
-    gridEl.appendChild(cell);
+      cell.appendChild(input);
+      gridEl.appendChild(cell);
+    }
   }
 }
 
