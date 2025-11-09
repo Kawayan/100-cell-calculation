@@ -84,8 +84,30 @@ function renderGrid() {
     input.setAttribute('inputmode', 'numeric');
     input.value = p.userInput ?? '';
     input.addEventListener('input', () => {
-      p.userInput = input.value.trim();
-      // 入力時の自動採点はしない（採点ボタンでまとめて）
+      const userRaw = input.value.trim();
+      p.userInput = userRaw;
+      
+      // Auto-check answer
+      const parsed = userRaw === '' ? null : Number(userRaw);
+      const isCorrect = parsed !== null && !Number.isNaN(parsed) && parsed === p.answer;
+      
+      if (isCorrect) {
+        cell.classList.remove('wrong');
+        cell.classList.add('correct');
+        // Move to next cell
+        setTimeout(() => {
+          focusNextInput(p.id);
+        }, 100);
+      } else {
+        cell.classList.remove('correct');
+        if (userRaw !== '') {
+          cell.classList.add('wrong');
+        } else {
+          cell.classList.remove('wrong');
+        }
+      }
+      
+      updateStatus();
     });
 
     // Enterで次のセルにフォーカスする
@@ -146,18 +168,18 @@ function updateStatus(correctCount?: number) {
 function startTimer() {
   if (timerInterval)
      return; // 既に動いている
-    
+     
   startTime = Date.now();
   timerInterval = window.setInterval(() => {
     if (!startTime) return;
-    const elapsed = Math.floor((Date.now() - startTime) / 1000);
-    timerEl.textContent = formatTime(elapsed);
-  }, 500);
+    const elapsedMs = Date.now() - startTime;
+    timerEl.textContent = formatTime(elapsedMs);
+  }, 100);
 }
 
 function resetTimer() {
   stopTimer();
-  timerEl.textContent = '00:00';
+  timerEl.textContent = '00:00:000';
 }
 
 function stopTimer() {
@@ -168,10 +190,12 @@ function stopTimer() {
   startTime = null;
 }
 
-function formatTime(sec: number) {
-  const mm = Math.floor(sec / 60).toString().padStart(2, '0');
-  const ss = (sec % 60).toString().padStart(2, '0');
-  return `${mm}:${ss}`;
+function formatTime(ms: number) {
+  const totalSec = Math.floor(ms / 1000);
+  const mm = Math.floor(totalSec / 60).toString().padStart(2, '0');
+  const ss = (totalSec % 60).toString().padStart(2, '0');
+  const mmm = (ms % 1000).toString().padStart(3, '0');
+  return `${mm}:${ss}:${mmm}`;
 }
 
 // 小さなヘルパー: 全入力欄にフォーカスする最初のもの
