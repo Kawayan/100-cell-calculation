@@ -47,11 +47,16 @@
   </header>
 
   <main>
-    <small>Tip:ESCキーで入力を削除できます。</small>
+    <small>開始ボタン、's'キーで開始。ESCキーで入力を全削除。</small>
     <div id="grid" aria-live="polite"></div>
   </main>
 
   <footer>
+    <div id="bestTime">Best: -</div>
+    <div id="timeHistory">
+      <div>History:</div>
+    </div>
+    <button id="clearHistoryBtn">履歴をクリア</button>
   </footer>
 
   <script type="module" src="dist/app.js" defer></script>
