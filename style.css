@@ -43,6 +43,12 @@ select, button{
   align-items:center;
   flex-wrap:wrap;
 }
+
+#clearHistoryBtn {
+  gap:4px;
+  width: 100px;
+}
+
 #grid{
   display:grid;
   grid-template-columns: repeat(var(--grid-size), calc(var(--cell-size) * 1.2));

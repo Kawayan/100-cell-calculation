@@ -1,15 +1,7 @@
 ﻿type OperationType = '+' | '-' | '*';
 
-const VERSION = "1.0.1";
-
-interface Problem{
-  id: string;
-  num1: number;
-  num2: number;
-  opType: OperationType;
-  answer: number;
-  userInput?: string;
-}
+const VERSION = "1.0.2";
+const PROBLEMS_ROW_COL_NUM = 10;
 
 const opSelect = document.getElementById('opSelect') as HTMLSelectElement;
 const maxValueSelect = document.getElementById('maxValue') as HTMLSelectElement;
@@ -639,6 +631,13 @@ function enableAllInputs() {
   });
 }
 
+function clearAllInputs() {
+  const inputs = gridEl.querySelectorAll('input') as NodeListOf<HTMLInputElement>;
+  inputs.forEach(input => {
+    input.value = '';
+  });
+}
+
 function highlightRowAndColumn(cell: HTMLDivElement) {
   // Clear previous highlights
   clearHighlight();
@@ -664,19 +663,34 @@ function clearHighlight() {
   });
 }
 
+function onStartBtnClick(){
+  isInputEnabled = true;
+  enableAllInputs();
+  clearAllInputs();
+  startTimer();
+  focusFirst();
+}
+
+
 // イベント登録
+window.addEventListener("keydown", (event) => {
+  if (event.key === 's')
+  {
+    onStartBtnClick();
+  }
+});
+
+opSelect.addEventListener('change', () => generateProblems());
+
+maxValueSelect.addEventListener('change', () => generateProblems());
+
 regenerateBtn.addEventListener('click', () => {
   generateProblems();
   focusFirst();
 });
-opSelect.addEventListener('change', () => generateProblems());
-maxValueSelect.addEventListener('change', () => generateProblems());
 
 startBtn.addEventListener('click', () => {
-  isInputEnabled = true;
-  enableAllInputs();
-  startTimer();
-  focusFirst();
+  onStartBtnClick();
 });
 
 clearHistoryBtn.addEventListener('click', () => {
