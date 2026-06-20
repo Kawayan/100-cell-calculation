@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "lite-server": "^2.6.1",
+    "typescript": "^6.0.3",
     "webpack": "^5.102.1",
     "webpack-cli": "^6.0.1"
   },
