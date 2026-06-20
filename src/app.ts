@@ -274,10 +274,19 @@ function renderGrid() {
           }, 100);
         } else {
           cell.classList.remove('correct');
-          if (userRaw !== '') {
-            cell.classList.add('wrong');
-          } else {
+          if (userRaw === '') {
             cell.classList.remove('wrong');
+          } else if (userRaw.length >= problem.answer.toString().length) {
+            // 正解の桁数に達しても不正解なら、一瞬赤く表示してから入力をクリア
+            cell.classList.add('wrong');
+            setTimeout(() => {
+              input.value = '';
+              problem.userInput = '';
+              cell.classList.remove('wrong');
+            }, 200);
+          } else {
+            // まだ桁数が足りない（入力途中）の場合は判定を保留
+            cell.classList.add('wrong');
           }
         }
       });
