@@ -12,7 +12,8 @@ interface Problem{
 }
 
 const opSelect = document.getElementById('opSelect') as HTMLSelectElement;
-const maxValueSelect = document.getElementById('maxValue') as HTMLSelectElement;
+const maxValueSelect = document.getElementById('maxValue') as HTMLInputElement;
+const maxValueDisplay = document.getElementById('maxValueDisplay') as HTMLSpanElement;
 
 const regenerateBtn = document.getElementById('regenerateBtn') as HTMLButtonElement;
 const startBtn = document.getElementById('startBtn') as HTMLButtonElement;
@@ -698,7 +699,10 @@ window.addEventListener("keydown", (event) => {
 
 opSelect.addEventListener('change', () => generateProblems());
 
-maxValueSelect.addEventListener('change', () => generateProblems());
+maxValueSelect.addEventListener('input', () => {
+  maxValueDisplay.textContent = maxValueSelect.value;
+  generateProblems();
+});
 
 regenerateBtn.addEventListener('click', () => {
   generateProblems();

@@ -107,6 +107,60 @@ select:focus {
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
+/* ── Range slider ───────────────────────────────── */
+.slider-label {
+  gap: 8px;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 110px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  transition: background 0.15s;
+  accent-color: var(--primary);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 1px 4px rgba(99, 102, 241, 0.4);
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 1px 8px rgba(99, 102, 241, 0.5);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 1px 4px rgba(99, 102, 241, 0.4);
+  cursor: pointer;
+}
+
+.slider-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary-dark);
+  background: var(--primary-bg);
+  padding: 2px 7px;
+  border-radius: 6px;
+  min-width: 28px;
+  text-align: center;
+}
+
 button {
   padding: 5px 12px;
   font-size: 12px;

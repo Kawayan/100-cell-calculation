@@ -22,20 +22,10 @@
         </select>
       </label>
 
-      <label>
+      <label class="slider-label">
         上限:
-        <select id="maxValue">
-          <option value="9" selected>9</option>
-          <option value="19">19</option>
-          <option value="29">29</option>
-          <option value="39">39</option>
-          <option value="49">49</option>
-          <option value="59">59</option>
-          <option value="69">69</option>
-          <option value="79">79</option>
-          <option value="89">89</option>
-          <option value="99">99</option>
-        </select>
+        <input type="range" id="maxValue" min="2" max="99" step="1" value="9" />
+        <span id="maxValueDisplay" class="slider-value">9</span>
       </label>
 
       <button id="regenerateBtn">↺ 作り直す</button>
