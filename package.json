@@ -16,13 +16,15 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "lite-server"
+    "start": "lite-server",
+    "screenshot": "tsc && node scripts/screenshot.js"
   },
   "engines": {
     "node": ">=18.12.0"
   },
   "devDependencies": {
     "lite-server": "^2.6.1",
+    "playwright": "^1.61.0",
     "typescript": "^6.0.3",
     "webpack": "^5.102.1",
     "webpack-cli": "^6.0.1"
