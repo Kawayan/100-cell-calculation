@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
@@ -7,9 +7,9 @@
   <title>100マス計算</title>
 </head>
 <body>
-  <h1>
-    100マス計算 <small id="version"></small>
-  </h1>
+  <div class="app-header">
+    <h1>100マス計算 <small id="version"></small></h1>
+  </div>
 
   <header>
     <div id="controls">
@@ -17,13 +17,13 @@
         演算:
         <select id="opSelect">
           <option value="+">足し算 (+)</option>
-          <option value="-">引き算 (-)</option>
-          <option value="*">掛け算 (x)</option>
+          <option value="-">引き算 (−)</option>
+          <option value="*">掛け算 (×)</option>
         </select>
       </label>
 
       <label>
-        数値の上限:
+        上限:
         <select id="maxValue">
           <option value="9" selected>9</option>
           <option value="19">19</option>
@@ -38,23 +38,27 @@
         </select>
       </label>
 
-      <button id="regenerateBtn">問題を作り直す</button>
-      <button id="startBtn">開始</button>
+      <button id="regenerateBtn">↺ 作り直す</button>
+      <button id="startBtn">▶ 開始</button>
 
-      <span>時間: </span>
-      <div id="timer">00:00:00</div>
+      <div class="timer-wrapper">
+        <span class="timer-label">TIME</span>
+        <div id="timer">00:00:000</div>
+      </div>
     </div>
   </header>
 
   <main>
-    <small>開始ボタン、's'キーで開始。ESCキーで入力を全削除。</small>
+    <p class="hint">
+      <kbd>S</kbd> キーまたは開始ボタンでスタート &nbsp;·&nbsp; <kbd>ESC</kbd> で入力削除
+    </p>
     <div id="grid" aria-live="polite"></div>
   </main>
 
   <footer>
     <div id="bestTime">Best: -</div>
     <div id="timeHistory">
-      <div>History:</div>
+      <div class="history-label">History</div>
     </div>
     <button id="clearHistoryBtn">履歴をクリア</button>
   </footer>

@@ -154,11 +154,12 @@ function renderGrid() {
     }
   }
   
-  // Top-left empty cell
+  // Top-left op symbol cell
   const emptyCell = document.createElement('div');
-  emptyCell.className = 'cell header-cell';
-  emptyCell.dataset["row"] = '0'; // Header row
-  emptyCell.dataset["col"] = '0'; // Header column
+  emptyCell.className = 'cell header-cell op-cell';
+  emptyCell.textContent = formatOpType(opSelect.value as OperationType);
+  emptyCell.dataset["row"] = '0';
+  emptyCell.dataset["col"] = '0';
   gridEl.appendChild(emptyCell);
   
   // Header row (num2 values)
