@@ -17,8 +17,6 @@
 
     // Other Outputs
     "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
 
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
@@ -36,16 +34,12 @@
 
     // Recommended Options
     "strict": true,
-    "jsx": "react-jsx",
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
 
     "removeComments": true,
-    "forceConsistentCasingInFileNames": true,
-
-    // Experimental Options
-    "experimentalDecorators": true
+    "forceConsistentCasingInFileNames": true
   }
 }
